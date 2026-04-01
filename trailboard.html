@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrailBoard — Ingraham Trail Community</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --spruce: #1a2e1f;
+    --pine: #2d4a35;
+    --lichen: #7a9e6e;
+    --frost: #c8ddd0;
+    --birch: #f0ede4;
+    --bark: #5c4a32;
+    --amber: #d4821a;
+    --lake: #3a6b7a;
+    --sky: #6fa8bc;
+    --snow: #fafaf8;
+    --ride-bg: #e8f0eb;
+    --ride-accent: #2d4a35;
+    --errand-bg: #fdf0e0;
+    --errand-accent: #b8710f;
+    --offer-dot: #4a8c5c;
+    --request-dot: #c05a2a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--spruce);
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 400;
+    color: var(--spruce);
+    min-height: 100vh;
+  }
+
+  /* Subtle boreal texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      radial-gradient(ellipse at 20% 50%, rgba(106,168,188,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(122,158,110,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    background: var(--pine);
+    padding: 18px 20px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--lichen);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+  }
+
+  .header-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .wordmark {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+
+  .wordmark-title {
+    font-family: 'Bitter', serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--frost);
+    letter-spacing: -0.02em;
+  }
+
+  .wordmark-sub {
+    font-size: 0.7rem;
+    font-weight: 300;
+    color: var(--lichen);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .header-btn {
+    background: var(--amber);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .header-btn:active { transform: scale(0.97); background: #b86e12; }
+
+  /* Filter tabs */
+  .filter-bar {
+    background: var(--pine);
+    padding: 0 20px 12px;
+    position: sticky;
+    top: 64px;
+    z-index: 99;
+  }
+
+  .filter-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    gap: 6px;
+  }
+
+  .filter-tab {
+    border: 1.5px solid rgba(200,221,208,0.25);
+    background: transparent;
+    color: var(--frost);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    opacity: 0.7;
+  }
+
+  .filter-tab.active {
+    background: var(--lichen);
+    border-color: var(--lichen);
+    color: var(--spruce);
+    opacity: 1;
+  }
+
+  /* Main content */
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 16px 16px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Date group */
+  .date-group { margin-bottom: 20px; }
+
+  .date-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 0 2px;
+  }
+
+  .date-label {
+    font-family: 'Bitter', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--frost);
+    white-space: nowrap;
+  }
+
+  .date-label.today { color: var(--amber); }
+
+  .date-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(200,221,208,0.2);
+  }
+
+  .date-count {
+    font-size: 0.72rem;
+    color: rgba(200,221,208,0.5);
+    font-weight: 300;
+  }
+
+  /* Cards */
+  .card {
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0 12px;
+    align-items: start;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .card:active { transform: scale(0.985); }
+
+  .card.ride { background: var(--ride-bg); }
+  .card.errand { background: var(--errand-bg); }
+
+  /* Left accent stripe */
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+
+  .card.ride::before { background: var(--ride-accent); }
+  .card.errand::before { background: var(--errand-accent); }
+
+  /* Type dot + time column */
+  .card-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-top: 2px;
+  }
+
+  .type-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .offer .type-dot { background: var(--offer-dot); }
+  .request .type-dot { background: var(--request-dot); }
+
+  .card-time {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(26,46,31,0.55);
+    text-align: center;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* Card body */
+  .card-body { min-width: 0; }
+
+  .card-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 3px;
+  }
+
+  .card-type-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  .ride .card-type-badge {
+    background: var(--ride-accent);
+    color: var(--frost);
+  }
+
+  .errand .card-type-badge {
+    background: var(--errand-accent);
+    color: white;
+  }
+
+  .offer .card-type-badge { opacity: 1; }
+  .request .card-type-badge { opacity: 0.75; }
+
+  .card-who {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--spruce);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-detail {
+    font-size: 0.88rem;
+    color: rgba(26,46,31,0.8);
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+
+  .card-note {
+    font-size: 0.78rem;
+    color: rgba(26,46,31,0.55);
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  /* Seats / space indicator */
+  .card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    padding-top: 2px;
+  }
+
+  .seats-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--offer-dot);
+    background: rgba(74,140,92,0.12);
+    border-radius: 8px;
+    padding: 3px 7px;
+    white-space: nowrap;
+  }
+
+  .contact-btn {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--lake);
+    background: rgba(58,107,122,0.1);
+    border: none;
+    border-radius: 8px;
+    padding: 4px 9px;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .contact-btn:active { background: rgba(58,107,122,0.25); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: rgba(200,221,208,0.4);
+  }
+
+  .empty-state-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.9rem; line-height: 1.5; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,20,12,0.75);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--birch);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 36px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 92vh;
+    overflow-y: auto;
+    transform: translateY(30px);
+    transition: transform 0.25s;
+  }
+
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(26,46,31,0.2);
+    border-radius: 2px;
+    margin: 0 auto 18px;
+  }
+
+  .modal-title {
+    font-family: 'Bitter', serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--spruce);
+    margin-bottom: 18px;
+  }
+
+  /* Toggle: Ride / Errand */
+  .toggle-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .toggle-btn {
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 10px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: rgba(26,46,31,0.07);
+    color: rgba(26,46,31,0.5);
+  }
+
+  .toggle-btn.active-ride {
+    background: var(--ride-bg);
+    border-color: var(--ride-accent);
+    color: var(--ride-accent);
+  }
+
+  .toggle-btn.active-errand {
+    background: var(--errand-bg);
+    border-color: var(--errand-accent);
+    color: var(--errand-accent);
+  }
+
+  /* Offer / Request sub-toggle */
+  .sub-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .sub-btn {
+    flex: 1;
+    border: 1.5px solid rgba(26,46,31,0.2);
+    border-radius: 8px;
+    padding: 8px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background: transparent;
+    color: rgba(26,46,31,0.45);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .sub-btn .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .sub-btn.active-offer { border-color: var(--offer-dot); color: var(--offer-dot); background: rgba(74,140,92,0.07); }
+  .sub-btn.active-request { border-color: var(--request-dot); color: var(--request-dot); background: rgba(192,90,42,0.07); }
+
+  /* Form fields */
+  .field-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(26,46,31,0.5);
+    margin-bottom: 5px;
+    margin-top: 14px;
+  }
+
+  .field-label:first-of-type { margin-top: 0; }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="time"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    border: 1.5px solid rgba(26,46,31,0.18);
+    border-radius: 9px;
+    padding: 10px 13px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.95rem;
+    color: var(--spruce);
+    background: white;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--lichen);
+  }
+
+  textarea { resize: vertical; min-height: 70px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .submit-btn {
+    width: 100%;
+    margin-top: 20px;
+    background: var(--pine);
+    color: var(--frost);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Bitter', serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .submit-btn:active { transform: scale(0.98); background: var(--spruce); }
+
+  .cancel-btn {
+    width: 100%;
+    margin-top: 10px;
+    background: transparent;
+    color: rgba(26,46,31,0.45);
+    border: none;
+    padding: 10px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  /* Contact modal */
+  .contact-modal .modal { max-height: 60vh; }
+
+  .contact-info {
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .contact-name {
+    font-family: 'Bitter', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--spruce);
+    margin-bottom: 4px;
+  }
+
+  .contact-detail-line {
+    font-size: 0.88rem;
+    color: rgba(26,46,31,0.7);
+    margin-bottom: 3px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--spruce);
+    color: var(--frost);
+    padding: 12px 22px;
+    border-radius: 30px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    z-index: 300;
+    transition: transform 0.3s;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 10px 16px 0;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    color: rgba(200,221,208,0.6);
+    font-weight: 300;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="wordmark">
+      <span class="wordmark-title">TrailBoard</span>
+      <span class="wordmark-sub">Ingraham Trail Community</span>
+    </div>
+    <button class="header-btn" onclick="openPostModal()">+ Post</button>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <div class="filter-inner">
+    <button class="filter-tab active" data-filter="all" onclick="setFilter('all', this)">All</button>
+    <button class="filter-tab" data-filter="ride" onclick="setFilter('ride', this)">🚗 Rides</button>
+    <button class="filter-tab" data-filter="errand" onclick="setFilter('errand', this)">🛒 Errands</button>
+    <button class="filter-tab" data-filter="offer" onclick="setFilter('offer', this)">Offering</button>
+    <button class="filter-tab" data-filter="request" onclick="setFilter('request', this)">Needed</button>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--offer-dot)"></div>Offering</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--request-dot)"></div>Needed</div>
+  </div>
+</div>
+
+<main id="board"></main>
+
+<!-- Post Modal -->
+<div class="modal-overlay" id="postModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Post a Ride or Errand</div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn active-ride" id="typeRide" onclick="setType('ride')">🚗 Ride</button>
+      <button class="toggle-btn" id="typeErrand" onclick="setType('errand')">🛒 Errand</button>
+    </div>
+
+    <div class="sub-toggle">
+      <button class="sub-btn active-offer" id="subOffer" onclick="setSubtype('offer')">
+        <div class="dot" style="background:var(--offer-dot)"></div> I'm Offering
+      </button>
+      <button class="sub-btn" id="subRequest" onclick="setSubtype('request')">
+        <div class="dot" style="background:var(--request-dot)"></div> I Need
+      </button>
+    </div>
+
+    <div class="field-label">Your Name</div>
+    <input type="text" id="fName" placeholder="e.g. Margaret">
+
+    <div id="rideFields">
+      <div class="two-col">
+        <div>
+          <div class="field-label">Date</div>
+          <input type="date" id="fDate">
+        </div>
+        <div>
+          <div class="field-label">Leaving ~</div>
+          <input type="time" id="fTime">
+        </div>
+      </div>
+
+      <div class="field-label">Going to / from</div>
+      <input type="text" id="fDestination" placeholder="e.g. Yellowknife, Super A, hospital…">
+
+      <div id="seatsRow">
+        <div class="field-label">Seats Available</div>
+        <input type="number" id="fSeats" min="1" max="6" placeholder="2" style="max-width:100px">
+      </div>
+    </div>
+
+    <div id="errandFields" style="display:none">
+      <div class="two-col">
+        <div>
+          <div class="field-label">Date Needed By</div>
+          <input type="date" id="fErrandDate">
+        </div>
+        <div>
+          <div class="field-label">Store / Location</div>
+          <input type="text" id="fStore" placeholder="Super A, Walmart…">
+        </div>
+      </div>
+    </div>
+
+    <div class="field-label">Note (optional)</div>
+    <textarea id="fNote" placeholder="Anything useful — flexible on time, returning same day, need help carrying, etc."></textarea>
+
+    <div class="field-label">Contact (how to reach you)</div>
+    <input type="text" id="fContact" placeholder="Text 867-xxx-xxxx, or knock at lot 7">
+
+    <button class="submit-btn" onclick="submitPost()">Post It</button>
+    <button class="cancel-btn" onclick="closeModal('postModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- Contact Modal -->
+<div class="modal-overlay contact-modal" id="contactModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="contactModalTitle">Contact</div>
+    <div class="contact-info" id="contactInfo"></div>
+    <button class="cancel-btn" onclick="closeModal('contactModal')">Close</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Sample data ──────────────────────────────────────────────
+const today = new Date();
+const fmt = (d) => d.toISOString().split('T')[0];
+
+function daysFrom(n) {
+  const d = new Date(today);
+  d.setDate(d.getDate() + n);
+  return fmt(d);
+}
+
+let posts = [
+  {
+    id: 1, type: 'ride', subtype: 'offer',
+    name: 'Margaret', date: daysFrom(0), time: '09:30',
+    destination: 'Yellowknife — errands + Super A',
+    seats: 2, note: 'Back by 3pm. Happy to grab things if you give me a list.',
+    contact: 'Text 867-444-0112'
+  },
+  {
+    id: 2, type: 'errand', subtype: 'request',
+    name: 'Jim & Carol', date: daysFrom(0), time: null,
+    destination: null, store: 'Super A',
+    note: 'Need: whole milk (2%), sourdough if they have it, and a bag of bird seed (any). Happy to pay back + extra.',
+    contact: 'Drop a note in our mailbox (lot 4) or text 867-444-0287'
+  },
+  {
+    id: 3, type: 'ride', subtype: 'request',
+    name: 'Diane',  date: daysFrom(1), time: '08:00',
+    destination: 'Yellowknife Health Centre — appointment',
+    seats: null, note: 'Appointment at 10am. Would need to leave by 8:30 at the latest. Can chip in for gas.',
+    contact: 'Lot 9 — knock or 867-444-0341'
+  },
+  {
+    id: 4, type: 'ride', subtype: 'offer',
+    name: 'Pete', date: daysFrom(1), time: '13:00',
+    destination: 'Yellowknife, flexible on route',
+    seats: 3, note: 'Heading in for hardware. Returning around 5.',
+    contact: '867-444-0198'
+  },
+  {
+    id: 5, type: 'errand', subtype: 'offer',
+    name: 'Sandra', date: daysFrom(2), time: null,
+    destination: null, store: 'Walmart + Canadian Tire',
+    note: 'Going Tuesday. Can pick up most things — just ask.',
+    contact: 'lot12sandra@example.com or text 867-444-0552'
+  },
+  {
+    id: 6, type: 'ride', subtype: 'offer',
+    name: 'Tom', date: daysFrom(4), time: '07:00',
+    destination: 'Yellowknife — early run',
+    seats: 1, note: 'Early start. Back by noon.',
+    contact: '867-444-0076'
+  }
+];
+
+let nextId = 10;
+let currentFilter = 'all';
+let currentType = 'ride';
+let currentSubtype = 'offer';
+
+// ── Render ───────────────────────────────────────────────────
+function getFilteredPosts() {
+  return posts.filter(p => {
+    if (currentFilter === 'all') return true;
+    if (currentFilter === 'ride') return p.type === 'ride';
+    if (currentFilter === 'errand') return p.type === 'errand';
+    if (currentFilter === 'offer') return p.subtype === 'offer';
+    if (currentFilter === 'request') return p.subtype === 'request';
+    return true;
+  });
+}
+
+function groupByDate(arr) {
+  const groups = {};
+  arr.forEach(p => {
+    const d = p.date;
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(p);
+  });
+  return groups;
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const todayStr = fmt(today);
+  const tomorrowStr = daysFrom(1);
+  if (dateStr === todayStr) return 'Today';
+  if (dateStr === tomorrowStr) return 'Tomorrow';
+  return d.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function formatTime(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const ampm = h >= 12 ? 'pm' : 'am';
+  const h12 = h % 12 || 12;
+  return `${h12}:${m.toString().padStart(2,'0')}\u202f${ampm}`;
+}
+
+function renderCard(p) {
+  const timeLabel = p.time ? formatTime(p.time) : (p.type === 'errand' ? 'flexible' : '');
+  const subtypeBadge = p.subtype === 'offer' ? 'Offering' : 'Needed';
+  const typeBadge = p.type === 'ride' ? 'Ride' : 'Errand';
+
+  let detail = '';
+  if (p.type === 'ride') {
+    detail = p.destination || '';
+  } else {
+    detail = p.store ? `📍 ${p.store}` : '';
+  }
+
+  const seatsHtml = (p.type === 'ride' && p.subtype === 'offer' && p.seats)
+    ? `<div class="seats-badge">${p.seats} seat${p.seats > 1 ? 's' : ''}</div>` : '';
+
+  return `
+    <div class="card ${p.type} ${p.subtype}" onclick="showContact(${p.id})">
+      <div class="card-left">
+        <div class="type-dot"></div>
+        <div class="card-time">${timeLabel}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="card-type-badge">${typeBadge} · ${subtypeBadge}</span>
+          <span class="card-who">${p.name}</span>
+        </div>
+        ${detail ? `<div class="card-detail">${detail}</div>` : ''}
+        ${p.note ? `<div class="card-note">${p.note}</div>` : ''}
+      </div>
+      <div class="card-right">
+        ${seatsHtml}
+        <button class="contact-btn" onclick="event.stopPropagation(); showContact(${p.id})">Contact</button>
+      </div>
+    </div>`;
+}
+
+function render() {
+  const board = document.getElementById('board');
+  const filtered = getFilteredPosts();
+
+  // Only show today and future
+  const todayStr = fmt(today);
+  const upcoming = filtered.filter(p => p.date >= todayStr);
+  upcoming.sort((a, b) => a.date.localeCompare(b.date) || (a.time || '23:59').localeCompare(b.time || '23:59'));
+
+  if (upcoming.length === 0) {
+    board.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">🌲</div>
+      <p>Nothing posted yet.<br>Be the first to offer or request.</p>
+    </div>`;
+    return;
+  }
+
+  const groups = groupByDate(upcoming);
+  let html = '';
+
+  Object.keys(groups).sort().forEach(dateStr => {
+    const isToday = dateStr === fmt(today);
+    const label = formatDate(dateStr);
+    const count = groups[dateStr].length;
+    html += `<div class="date-group">
+      <div class="date-header">
+        <div class="date-label ${isToday ? 'today' : ''}">${label}</div>
+        <div class="date-line"></div>
+        <div class="date-count">${count} post${count !== 1 ? 's' : ''}</div>
+      </div>
+      ${groups[dateStr].map(renderCard).join('')}
+    </div>`;
+  });
+
+  board.innerHTML = html;
+}
+
+// ── Filter ───────────────────────────────────────────────────
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+// ── Modal ────────────────────────────────────────────────────
+function openPostModal() {
+  // Default date to today
+  document.getElementById('fDate').value = fmt(today);
+  document.getElementById('fErrandDate').value = fmt(today);
+  document.getElementById('postModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function setType(t) {
+  currentType = t;
+  document.getElementById('typeRide').className = 'toggle-btn' + (t === 'ride' ? ' active-ride' : '');
+  document.getElementById('typeErrand').className = 'toggle-btn' + (t === 'errand' ? ' active-errand' : '');
+  document.getElementById('rideFields').style.display = t === 'ride' ? '' : 'none';
+  document.getElementById('errandFields').style.display = t === 'errand' ? '' : 'none';
+  document.getElementById('seatsRow').style.display = (t === 'ride' && currentSubtype === 'offer') ? '' : 'none';
+}
+
+function setSubtype(s) {
+  currentSubtype = s;
+  document.getElementById('subOffer').className = 'sub-btn' + (s === 'offer' ? ' active-offer' : '');
+  document.getElementById('subRequest').className = 'sub-btn' + (s === 'request' ? ' active-request' : '');
+  document.getElementById('seatsRow').style.display = (currentType === 'ride' && s === 'offer') ? '' : 'none';
+}
+
+function submitPost() {
+  const name = document.getElementById('fName').value.trim();
+  const contact = document.getElementById('fContact').value.trim();
+  const note = document.getElementById('fNote').value.trim();
+
+  if (!name) { showToast('Please enter your name'); return; }
+  if (!contact) { showToast('Please add a contact method'); return; }
+
+  const post = {
+    id: nextId++,
+    type: currentType,
+    subtype: currentSubtype,
+    name, note, contact
+  };
+
+  if (currentType === 'ride') {
+    post.date = document.getElementById('fDate').value || fmt(today);
+    post.time = document.getElementById('fTime').value || null;
+    post.destination = document.getElementById('fDestination').value.trim();
+    post.seats = currentSubtype === 'offer' ? (parseInt(document.getElementById('fSeats').value) || null) : null;
+  } else {
+    post.date = document.getElementById('fErrandDate').value || fmt(today);
+    post.time = null;
+    post.store = document.getElementById('fStore').value.trim();
+  }
+
+  posts.push(post);
+
+  // Clear form
+  ['fName','fDate','fTime','fDestination','fSeats','fNote','fContact','fErrandDate','fStore'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  closeModal('postModal');
+  render();
+  showToast('Posted! ✓');
+}
+
+function showContact(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+
+  const typeLabel = p.type === 'ride' ? 'Ride' : 'Errand';
+  const subtypeLabel = p.subtype === 'offer' ? 'Offered by' : 'Requested by';
+  let detail = '';
+  if (p.type === 'ride') {
+    detail = `${formatDate(p.date)}${p.time ? ' at ' + formatTime(p.time) : ''}<br>${p.destination || ''}`;
+  } else {
+    detail = `${p.store || ''} — needed by ${formatDate(p.date)}`;
+  }
+
+  document.getElementById('contactModalTitle').textContent = `${typeLabel} · ${subtypeLabel} ${p.name}`;
+  document.getElementById('contactInfo').innerHTML = `
+    <div class="contact-name">${p.name}</div>
+    <div class="contact-detail-line">${detail}</div>
+    ${p.note ? `<div class="contact-detail-line" style="margin-top:8px;font-style:italic">${p.note}</div>` : ''}
+    <div class="contact-detail-line" style="margin-top:12px;font-weight:600">📞 ${p.contact}</div>
+  `;
+  document.getElementById('contactModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Close on overlay click ───────────────────────────────────
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+// ── Init ─────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
